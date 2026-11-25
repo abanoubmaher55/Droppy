@@ -1,0 +1,111 @@
+{
+  "context": {
+    "projectPath": "C:/Users/Abanoub Maher/Desktop/Dropy/SaveWaterEG/SaveWaterEG/Packages",
+    "unityVersion": "6000.3.26f1"
+  },
+  "inputs": [
+    "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Packages\\manifest.json",
+    "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Packages\\packages-lock.json",
+    "D:\\Downloads\\6000.3.26f1\\Editor\\Data\\Resources\\PackageManager\\BuiltInPackages\\BuiltInPackagesCombined.sha1"
+  ],
+  "outputs": {
+    "com.unity.ugui@2.0.0": {
+      "name": "com.unity.ugui",
+      "displayName": "uGUI",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.ugui@0e6b3c20b946",
+      "fingerprint": "0e6b3c20b9465c419d77f9b228cde16f5c94adbd",
+      "editorCompatibility": "2019.2.0a1",
+      "version": "2.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.audio@1.0.0": {
+      "name": "com.unity.modules.audio",
+      "displayName": "Audio",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.audio",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.imgui@1.0.0": {
+      "name": "com.unity.modules.imgui",
+      "displayName": "IMGUI",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.imgui",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.jsonserialize@1.0.0": {
+      "name": "com.unity.modules.jsonserialize",
+      "displayName": "JSONSerialize",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.jsonserialize",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.physics2d@1.0.0": {
+      "name": "com.unity.modules.physics2d",
+      "displayName": "Physics 2D",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.physics2d",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.screencapture@1.0.0": {
+      "name": "com.unity.modules.screencapture",
+      "displayName": "Screen Capture",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.screencapture",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.ui@1.0.0": {
+      "name": "com.unity.modules.ui",
+      "displayName": "UI",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.ui",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.uielements@1.0.0": {
+      "name": "com.unity.modules.uielements",
+      "displayName": "UIElements",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.uielements",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.unitywebrequest@1.0.0": {
+      "name": "com.unity.modules.unitywebrequest",
+      "displayName": "Unity Web Request",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.unitywebrequest",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.hierarchycore@1.0.0": {
+      "name": "com.unity.modules.hierarchycore",
+      "displayName": "Hierarchy Core",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.hierarchycore",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.physics@1.0.0": {
+      "name": "com.unity.modules.physics",
+      "displayName": "Physics",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.physics",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    },
+    "com.unity.modules.imageconversion@1.0.0": {
+      "name": "com.unity.modules.imageconversion",
+      "displayName": "Image Conversion",
+      "resolvedPath": "C:\\Users\\Abanoub Maher\\Desktop\\Dropy\\SaveWaterEG\\SaveWaterEG\\Library\\PackageCache\\com.unity.modules.imageconversion",
+      "version": "1.0.0",
+      "source": "builtin",
+      "testable": false
+    }
+  }
+}
