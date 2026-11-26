@@ -6,23 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Project/Scenes/Loading.unity
-    guid: 69ae519964029ba45b636489185fe5c2
+    path: Assets/Scenes/Loading.unity
+    guid: aa10d0e1a11ced0000000000000000aa
   - enabled: 1
-    path: Assets/_Project/Scenes/MainMenu.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/Scenes/MainMenu.unity
+    guid: aa10d0e1a11ced0000000000000000ab
   - enabled: 1
-    path: Assets/_Project/Scenes/Level_Engineer.unity
-    guid: f043a33e294634941bedf86eece244fb
-  - enabled: 1
-    path: Assets/_Project/Scenes/Level_Technician.unity
-    guid: 9f42024cd7717204f9b8289e79f3b2bb
-  - enabled: 1
-    path: Assets/_Project/Scenes/Level_Collector.unity
-    guid: 897377a06b6b11f419935da93d98879b
-  - enabled: 1
-    path: Assets/_Project/Scenes/Level_Chemist.unity
-    guid: e12d2964a9da2084fa1a355fa837d654
-  m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_UseUCBPForAssetBundles: 0
+    path: Assets/Scenes/Game.unity
+    guid: aa10d0e1a11ced0000000000000000ac
+  m_configObjects: {}
