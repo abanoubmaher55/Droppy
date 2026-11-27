@@ -197,7 +197,7 @@ namespace SaveWaterEG
 
             // animated Droppy
             var droppyRt = UIFactory.Place(col, "Droppy", 0.12f, 0f, 0.88f, 0.23f);
-            var droppySprite = Resources.Load<Sprite>("Art/droppy");
+            var droppySprite = MainMenuController.LoadDroppySprite();
             if (droppySprite != null)
             {
                 UIFactory.Img(droppyRt, "img", droppySprite, Color.white);

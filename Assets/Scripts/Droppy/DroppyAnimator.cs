@@ -88,7 +88,7 @@ namespace SaveWaterEG
 
         public void OnPointerClick(PointerEventData e)
         {
-            _jumpVel = 420f; // happy hop when the child taps Droppy
+            _jumpVel = 520f; // happy hop when the child taps Droppy
         }
     }
 }

@@ -19,20 +19,43 @@ namespace SaveWaterEG
             UIFactory.EnsureEventSystem();
             var canvas = UIFactory.EnsureCanvas("LoadingCanvas");
 
-            // full-screen loading art (extracted from the user's design)
-            var bgSprite = Resources.Load<Sprite>("Art/loading_bg");
-            if (bgSprite != null)
+            // Switch off any other canvas already in the scene (old loading text / old bar / old background
+            // left over from earlier setups). Only our own canvas should draw on this screen.
+            foreach (var other in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                var bg = UIFactory.Img(canvas.transform, "BG", bgSprite, Color.white, false);
-                bg.type = Image.Type.Simple;
+                if (other == canvas || other.transform.IsChildOf(canvas.transform)) continue;
+                Debug.Log("[SaveWaterEG] Loading: disabled stray canvas '" + other.name + "' (" + other.GetComponentsInChildren<Graphic>(true).Length + " UI elements)");
+                other.gameObject.SetActive(false);
+            }
+
+            // Solid sky colour behind everything (shows only in letterbox bars on odd screen shapes).
+            UIFactory.Panel(canvas.transform, "Sky", new Color(0.35f, 0.72f, 0.95f)).GetComponent<Image>().raycastTarget = false;
+
+            // "Stage": a rect that always has the art's aspect ratio and fits fully inside the screen
+            // (no cropping, any window shape / Game view size). Art and bar are children of it, so the
+            // bar always stays in the same spot on the art.
+            var bgTex = Resources.Load<Texture2D>("Art/loading_bg");
+            float aspect = bgTex != null ? (float)bgTex.width / bgTex.height : 16f / 9f;
+            var stage = UIFactory.Root(canvas.transform, "Stage");
+            var fitter = stage.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fitter.aspectRatio = aspect;
+
+            if (bgTex != null)
+            {
+                var bgRt = UIFactory.Root(stage, "BG");
+                var raw = bgRt.gameObject.AddComponent<RawImage>();
+                raw.texture = bgTex;
+                raw.color = Color.white;
+                raw.raycastTarget = false;
             }
             else
             {
-                UIFactory.Panel(canvas.transform, "BG", new Color(0.35f, 0.72f, 0.95f));
+                Debug.LogWarning("[SaveWaterEG] Art/loading_bg NOT found in Resources/Art");
             }
 
-            // real progress bar over the art's bar strip (frame x .27-.73, y-up .25-.32)
-            var frame = UIFactory.Place(canvas.transform, "BarFrame", 0.27f, 0.255f, 0.73f, 0.32f);
+            // progress bar inside the stage (x .265-.735, y-up .108-.160 = the white box the user drew)
+            var frame = UIFactory.Place(stage, "BarFrame", 0.265f, 0.108f, 0.735f, 0.160f);
             UIFactory.Panel(frame, "frame", new Color(1, 1, 1, 0.55f));
             var fillArea = UIFactory.Place(frame, "FillArea", 0.015f, 0.18f, 0.985f, 0.82f);
             _fillRt = UIFactory.Place(fillArea, "Fill", 0, 0, 0.001f, 1f);
@@ -40,14 +63,13 @@ namespace SaveWaterEG
             _percent = UIFactory.Label(frame, "p", "1%", 30, new Color(0.05f, 0.3f, 0.6f));
             _percent.fontStyle = FontStyle.Bold;
 
-            // little animated Droppy cheering in the corner while loading
-            var droppyRt = UIFactory.Place(canvas.transform, "Droppy", 0.82f, 0.03f, 0.97f, 0.24f);
-            var droppySprite = Resources.Load<Sprite>("Art/droppy");
-            if (droppySprite != null)
-            {
-                UIFactory.Img(droppyRt, "img", droppySprite, Color.white);
-                droppyRt.gameObject.AddComponent<DroppyAnimator>();
-            }
+            // our own loading text, just under the bar
+            var lblRt = UIFactory.Place(stage, "LoadingText", 0.265f, 0.045f, 0.735f, 0.105f);
+            var lbl = UIFactory.Label(lblRt, "t", "جاري التحميل...", 34, Color.white);
+            lbl.fontStyle = FontStyle.Bold;
+            var ol = lbl.gameObject.AddComponent<Outline>();
+            ol.effectColor = new Color(0.05f, 0.25f, 0.5f, 0.9f);
+            ol.effectDistance = new Vector2(2, -2);
         }
 
         void Update()
