@@ -4,13 +4,11 @@ using UnityEngine.UI;
 
 namespace SaveWaterEG
 {
-    // Info tab: fully interactive water map of Egypt.
-    // Left: real filter checkboxes that show/hide map pins per water type.
-    // Center: drawn Egypt map with real tappable pins (pulse + name pill).
-    // Right: info card (updates on pin tap), Droppy's hint bubble, animated Droppy.
-    // Bottom-left of map: discovery counter sign.
     public class InfoTabController : MonoBehaviour
     {
+        public System.Action<int> onTab;
+        public System.Action onHome;
+
         static readonly string[] Types = { "fresh", "salty", "well", "spring" };
         static readonly string[] TypeIcons = { "💧", "🌊", "🚰", "👁" };
 
@@ -25,6 +23,8 @@ namespace SaveWaterEG
         Image _cardIcon;
         RectTransform _cardIconBg;
         List<MapLocation> _locations;
+        RectTransform _card;
+        Text _chipIconText;
 
         void Start()
         {
@@ -32,11 +32,65 @@ namespace SaveWaterEG
             foreach (var t in Types) _enabled[t] = true;
             var root = (RectTransform)transform;
 
-            BuildFilters(root);
-            BuildMap(root);
-            BuildRightColumn(root);
+            // 1. الخلفية الكاملة (يبحث عن صورة الخلفية في مجلد الشخصيات أو المعلومات)
+            var bgSprite = Resources.Load<Sprite>("Art/characters_tab/bg") 
+                        ?? Resources.Load<Sprite>("Art/characters_tab/background")
+                        ?? Resources.Load<Sprite>("Art/information_tab/bg");
+            if (bgSprite != null)
+            {
+                var bgRt = UIFactory.Place(root, "PageBg", 0f, 0f, 1f, 1f);
+                UIFactory.Img(bgRt, "img", bgSprite, Color.white).raycastTarget = false;
+            }
+            else
+            {
+                UIFactory.Panel(root, "PageBg", new Color(0.42f, 0.76f, 0.96f));
+            }
+
+            // 2. الشريط العلوي بالزراير الجديدة وزرار الباك
+            BuildTopBar(root);
+
+            // 3. محتوى الصفحة (الفلاتر + الخريطة + الكارت الجانبي)
+            var body = UIFactory.Place(root, "Body", 0.025f, 0.015f, 0.975f, 0.845f);
+            BuildFilters(body);
+            BuildMap(body);
+            BuildRightColumn(body);
             RefreshPins();
             ShowWelcome();
+        }
+
+        // ---------------- top bar (buttons + back arrow) ----------------
+        void BuildTopBar(RectTransform root)
+        {
+            var bar = UIFactory.Place(root, "TopBar", 0f, 0.86f, 1f, 0.98f);
+
+            var backRt = UIFactory.Place(bar, "BtnBack", 0.02f, 0.05f, 0.08f, 0.95f);
+            var backSp = Resources.Load<Sprite>("Art/information_tab/btn_back");
+            var backBtn = UIFactory.MakeButton(backRt, "b", "", 20, Color.white, Color.white, () => onHome?.Invoke());
+            if (backSp != null)
+            {
+                var img = backBtn.GetComponent<Image>();
+                img.sprite = backSp;
+                img.preserveAspect = true;
+            }
+
+            MakeImageTab(bar, "TabInfo", "Art/information_tab/btn_info", 0.36f, 0.50f, true, () => onTab?.Invoke(0));
+            MakeImageTab(bar, "TabChat", "Art/information_tab/btn_chat", 0.51f, 0.65f, false, () => onTab?.Invoke(1));
+            MakeImageTab(bar, "TabChars", "Art/information_tab/btn_chars", 0.66f, 0.80f, false, () => onTab?.Invoke(2));
+            MakeImageTab(bar, "TabLevels", "Art/information_tab/btn_levels", 0.81f, 0.95f, false, () => onTab?.Invoke(3));
+        }
+
+        void MakeImageTab(RectTransform parent, string name, string path, float xMin, float xMax, bool isActive, UnityEngine.Events.UnityAction act)
+        {
+            var rt = UIFactory.Place(parent, name, xMin, 0.08f, xMax, 0.92f);
+            var sp = Resources.Load<Sprite>(path);
+            var btn = UIFactory.MakeButton(rt, "b", "", 20, Color.white, Color.white, act);
+            if (sp != null)
+            {
+                var img = btn.GetComponent<Image>();
+                img.sprite = sp;
+                img.preserveAspect = true;
+            }
+            if (isActive) rt.localScale = Vector3.one * 1.06f;
         }
 
         // ---------------- left: filter panel ----------------
@@ -82,7 +136,6 @@ namespace SaveWaterEG
             var all = UIFactory.MakeButton(allRt, "b", "🔄 عرض الكل", 24, new Color(0.1f, 0.55f, 0.95f), Color.white, ShowAll);
             all.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
 
-            // discovery counter sign (wood style)
             var signRt = UIFactory.Place(panel, "Sign", 0.04f, 0.03f, 0.96f, 0.24f);
             UIFactory.Panel(signRt, "bg", new Color(0.55f, 0.35f, 0.16f));
             var signT = UIFactory.Place(signRt, "t1", 0.05f, 0.5f, 0.95f, 0.95f);
@@ -97,28 +150,24 @@ namespace SaveWaterEG
         void BuildMap(RectTransform root)
         {
             var frame = UIFactory.Place(root, "MapFrame", 0.195f, 0f, 0.80f, 1f);
-            UIFactory.Panel(frame, "bg", new Color(0.10f, 0.55f, 0.95f));
+            UIFactory.Panel(frame, "bg", new Color(0f, 0f, 0f, 0f));
 
-            // map holder keeps the map image aspect so pins stay aligned
             var holder = UIFactory.Sub(frame, "Map", Vector2.zero, Vector2.one, new Vector2(12, 12), new Vector2(-12, -12));
             var fit = holder.gameObject.AddComponent<AspectRatioFitter>();
             fit.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             fit.aspectRatio = 1.2f;
-            var mapSprite = Resources.Load<Sprite>("Art/egypt_map");
+            var mapSprite = Resources.Load<Sprite>("Art/information_tab/egypt_map") ?? Resources.Load<Sprite>("Art/egypt_map");
             var mapImg = UIFactory.Img(holder, "img", mapSprite != null ? mapSprite : UIFactory.WhiteSprite(),
                 mapSprite != null ? Color.white : new Color(0.9f, 0.8f, 0.6f), false);
             mapImg.type = Image.Type.Simple;
             mapImg.raycastTarget = true;
-            // tapping the map itself (not a pin) reminds the kid to tap the pins
             var mapBtn = mapImg.gameObject.AddComponent<Button>();
             mapBtn.transition = Selectable.Transition.None;
             mapBtn.onClick.AddListener(ShowWelcome);
 
-            // sea labels (shaped Arabic over the seas)
             SeaLabel(holder, "البحر الأبيض المتوسط", 0.22f, 0.93f);
             SeaLabel(holder, "البحر الأحمر", 0.80f, 0.34f);
 
-            // pins
             foreach (var loc in _locations)
             {
                 float x = Mathf.Clamp01(loc.x), y = Mathf.Clamp01(loc.y);
@@ -144,10 +193,6 @@ namespace SaveWaterEG
                 _pins.Add(pin.gameObject);
                 _pinLocs.Add(loc);
             }
-
-            // counter sign at the map's bottom-left corner
-            var signRt = UIFactory.Place(frame, "Corner", 0.02f, 0.02f, 0.24f, 0.09f);
-            signRt.gameObject.SetActive(false); // counter lives in the filter panel sign
         }
 
         void SeaLabel(Transform parent, string text, float x, float y)
@@ -165,7 +210,6 @@ namespace SaveWaterEG
         {
             var col = UIFactory.Place(root, "Right", 0.81f, 0f, 1f, 1f);
 
-            // info card
             var card = UIFactory.Place(col, "Card", 0f, 0.44f, 1f, 1f);
             UIFactory.Panel(card, "bg", new Color(1f, 1f, 1f, 0.97f));
 
@@ -188,14 +232,12 @@ namespace SaveWaterEG
             _cardBody = UIFactory.Label(bodyRt, "t", "", 21, new Color(0.15f, 0.25f, 0.4f), TextAnchor.UpperRight);
             _card = card;
 
-            // hint bubble
             var bubble = UIFactory.Place(col, "Bubble", 0.03f, 0.24f, 0.97f, 0.41f);
             UIFactory.Panel(bubble, "bg", new Color(1f, 1f, 1f, 0.95f));
             var bt = UIFactory.Label(bubble, "t", "اضغط على أي علامة على الخريطة لتتعرف على نوع المياه! 💧", 19, new Color(0.1f, 0.35f, 0.6f));
             bt.fontStyle = FontStyle.Bold;
             UIFactory.AddPulse(bubble.gameObject, 0.02f, 2f);
 
-            // animated Droppy
             var droppyRt = UIFactory.Place(col, "Droppy", 0.12f, 0f, 0.88f, 0.23f);
             var droppySprite = MainMenuController.LoadDroppySprite();
             if (droppySprite != null)
@@ -204,9 +246,6 @@ namespace SaveWaterEG
                 droppyRt.gameObject.AddComponent<DroppyAnimator>();
             }
         }
-
-        RectTransform _card;
-        Text _chipIconText;
 
         // ---------------- behavior ----------------
         void Toggle(string type)

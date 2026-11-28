@@ -1,54 +1,175 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SaveWaterEG
 {
-  // Makes a picture button feel alive: gentle breathing, grows on hover,
-  // dips on press (never smaller than the art underneath), springy bounce on click.
-  public class MenuButtonFX : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler,
-                              IPointerDownHandler, IPointerUpHandler, IPointerClickHandler
-  {
-    public float phase;
-    public float breatheAmount = 0.018f;
-    public float hoverScale = 1.08f;
-    public float pressScale = 1.02f;
-
-    RectTransform _rt;
-    RawImage _img;
-    bool _hover, _down;
-    float _scale = 1f, _vel;
-    float _bounceT = -1f;
-
-    void Awake() { _rt = (RectTransform)transform; _img = GetComponent<RawImage>(); }
-
-    void OnEnable() { _scale = 1f; _vel = 0f; _bounceT = -1f; }
-
-    public void OnPointerEnter(PointerEventData e) { _hover = true; }
-    public void OnPointerExit(PointerEventData e) { _hover = false; _down = false; }
-    public void OnPointerDown(PointerEventData e) { _down = true; }
-    public void OnPointerUp(PointerEventData e) { _down = false; }
-    public void OnPointerClick(PointerEventData e) { _bounceT = 0f; _vel = 4f; }
-
-    void Update()
+    public class MainMenuController : MonoBehaviour
     {
-      float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
-      // idle: slow breathing, always >= 1 so the baked art underneath stays covered
-      float idle = 1f + breatheAmount * (0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.1f + phase));
-      float target = _down ? pressScale : (_hover ? hoverScale : idle);
+        RectTransform _homePanel, _tabBar, _contentWrap;
+        RectTransform _infoPanel, _chatPanel, _charsPanel, _extraPanel;
+        Button _tabInfo, _tabChat, _tabChars, _tabExtra;
 
-      // spring toward the target (springy, slightly overshoots)
-      float k = 180f, d = 14f;
-      _vel += ((target - _scale) * k - _vel * d) * dt;
-      _scale += _vel * dt;
-      if (_scale < 1f) { _scale = 1f; if (_vel < 0f) _vel = 0f; }
+        const string ExtraTabName = "المستويات";
+        const string ExtraTabIcon = "🏆";
+        static readonly Color ExtraOrange = new Color(0.98f, 0.55f, 0.12f);
+        int _tab = -1;
 
-      _rt.localScale = new Vector3(_scale, _scale, 1f);
-      if (_img != null)
-      {
-        float c = _down ? 0.88f : (_hover ? 1.06f : 1f);
-        _img.color = new Color(c, c, c, 1f);
-      }
+        static readonly Color InfoBlue = new Color(0.10f, 0.55f, 0.95f);
+        static readonly Color ChatGreen = new Color(0.20f, 0.75f, 0.30f);
+        static readonly Color CharsPurple = new Color(0.55f, 0.30f, 0.85f);
+
+        void Start()
+        {
+            UIFactory.EnsureCamera(new Color(0.42f, 0.76f, 0.96f));
+            UIFactory.EnsureEventSystem();
+            var canvas = UIFactory.EnsureCanvas("MenuCanvas");
+            canvas.gameObject.AddComponent<UISoundManager>();
+            canvas.gameObject.AddComponent<TransparentButtonFix>();
+            var root = canvas.transform;
+
+            _contentWrap = UIFactory.Place(root, "Content", 0.025f, 0.015f, 0.975f, 0.845f);
+            UIFactory.Panel(_contentWrap, "sky", new Color(0.42f, 0.76f, 0.96f));
+            _chatPanel = UIFactory.Root(_contentWrap, "ChatPanel");
+            _chatPanel.gameObject.AddComponent<ChatbotController>();
+            _extraPanel = UIFactory.Root(_contentWrap, "ExtraPanel");
+
+            _tabBar = UIFactory.Place(root, "TopBar", 0, 0.855f, 1, 1);
+            var homeRt = UIFactory.Place(_tabBar, "Home", 0.012f, 0.08f, 0.068f, 0.92f);
+            var homeB = UIFactory.MakeButton(homeRt, "b", "🏠", 34, InfoBlue, Color.white, ShowHome);
+            homeB.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
+
+            var logoRt = UIFactory.Place(_tabBar, "Logo", 0.08f, 0.1f, 0.32f, 0.9f);
+            var logo = UIFactory.Label(logoRt, "t", "SaveWaterEG 💧", 44, Color.white, TextAnchor.MiddleLeft);
+            logo.fontStyle = FontStyle.Bold;
+            var lo = logo.gameObject.AddComponent<Outline>();
+            lo.effectColor = new Color(0.05f, 0.3f, 0.6f); lo.effectDistance = new Vector2(2, -2);
+
+            _tabInfo = MakeTab(_tabBar, "TabInfo", "🗺 المعلومات", 0.365f, 0.515f, InfoBlue, () => ShowTab(0));
+            _tabChat = MakeTab(_tabBar, "TabChat", "💬 الشات بوت", 0.522f, 0.668f, ChatGreen, () => ShowTab(1));
+            _tabChars = MakeTab(_tabBar, "TabChars", "👨‍👩‍👧 الشخصيات", 0.675f, 0.825f, CharsPurple, () => ShowTab(2));
+            _tabExtra = MakeTab(_tabBar, "TabExtra", ExtraTabIcon + " " + ExtraTabName, 0.832f, 0.982f, ExtraOrange, () => ShowTab(3));
+
+            _homePanel = UIFactory.Root(root, "HomePanel");
+            var bgTex = Resources.Load<Texture2D>("Art/main_menu/menu_bg") ?? Resources.Load<Texture2D>("Art/menu_bg");
+            if (bgTex != null)
+            {
+                var bgRt = UIFactory.Root(_homePanel, "BG");
+                var raw = bgRt.gameObject.AddComponent<RawImage>();
+                raw.texture = bgTex;
+                raw.color = Color.white;
+                raw.raycastTarget = false;
+            }
+            else
+            {
+                UIFactory.Panel(_homePanel, "BG", new Color(0.42f, 0.76f, 0.96f));
+            }
+
+            var droppyRt = UIFactory.Place(_homePanel, "Droppy", 0.109f, 0.115f, 0.379f, 0.644f);
+            var droppySprite = LoadDroppySprite();
+            if (droppySprite != null)
+            {
+                UIFactory.Img(droppyRt, "img", droppySprite, Color.white);
+                droppyRt.gameObject.AddComponent<DroppyAnimator>();
+            }
+
+            LiveButton("info", "BtnInfo", 0.391f, 0.250f, 0.518f, 0.465f, 0f, () => ShowTab(0));
+            LiveButton("chat", "BtnChat", 0.529f, 0.250f, 0.656f, 0.465f, 1.3f, () => ShowTab(1));
+            LiveButton("levels", "BtnLevels", 0.668f, 0.250f, 0.797f, 0.465f, 2.6f, () => ShowTab(3));
+            LiveButton("chars", "BtnChars", 0.809f, 0.250f, 0.939f, 0.465f, 3.9f, () => ShowTab(2));
+
+            _infoPanel = UIFactory.Root(root, "InfoPanel");
+            var infoCtl = _infoPanel.gameObject.AddComponent<InfoTabController>();
+            infoCtl.onTab = ShowTab;
+            infoCtl.onHome = ShowHome;
+
+            _charsPanel = UIFactory.Root(root, "CharsPanel");
+            var charsCtl = _charsPanel.gameObject.AddComponent<CharactersTabController>();
+            charsCtl.onTab = ShowTab;
+            charsCtl.onHome = ShowHome;
+
+            ShowHome();
+        }
+
+        public static Sprite LoadDroppySprite()
+        {
+            string[] paths = { "Art/main_menu/droppy", "Art/droppy", "Art/Characters/droppy", "Art/Info/droppy" };
+            foreach (var p in paths)
+            {
+                var sp = Resources.Load<Sprite>(p);
+                if (sp != null) return sp;
+                var tex = Resources.Load<Texture2D>(p);
+                if (tex != null)
+                    return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            return null;
+        }
+
+        void LiveButton(string art, string name, float xMin, float yMin, float xMax, float yMax, float phase, UnityEngine.Events.UnityAction act)
+        {
+            string folder = art == "info" ? "Info" : art == "chat" ? "Chat" : art == "levels" ? "Levels" : "Characters";
+            var tex = Resources.Load<Texture2D>("Art/main_menu/btn_" + art);
+            if (tex == null) tex = Resources.Load<Texture2D>("Art/" + folder + "/btn_" + art);
+            if (tex == null) tex = Resources.Load<Texture2D>("Art/btn_" + art);
+            if (tex == null) { UIFactory.GhostButton(_homePanel, name, xMin, yMin, xMax, yMax, act); return; }
+            var rt = UIFactory.Place(_homePanel, name, xMin, yMin, xMax, yMax);
+            var raw = rt.gameObject.AddComponent<RawImage>();
+            raw.texture = tex;
+            var btn = rt.gameObject.AddComponent<Button>();
+            btn.transition = Selectable.Transition.None;
+            btn.onClick.AddListener(act);
+            var fx = rt.gameObject.AddComponent<MenuButtonFX>();
+            fx.phase = phase;
+        }
+
+        Button MakeTab(Transform parent, string name, string label, float xMin, float xMax, Color color, UnityEngine.Events.UnityAction act)
+        {
+            var rt = UIFactory.Place(parent, name, xMin, 0.1f, xMax, 0.9f);
+            var b = UIFactory.MakeButton(rt, "b", label, 30, color, Color.white, act);
+            var t = b.GetComponentInChildren<Text>();
+            t.fontStyle = FontStyle.Bold;
+            var ol = t.gameObject.AddComponent<Outline>();
+            ol.effectColor = new Color(0, 0, 0, 0.35f);
+            return b;
+        }
+
+        void ShowHome()
+        {
+            _tab = -1;
+            _homePanel.gameObject.SetActive(true);
+            _tabBar.gameObject.SetActive(false);
+            _contentWrap.gameObject.SetActive(false);
+            _infoPanel.gameObject.SetActive(false);
+            _charsPanel.gameObject.SetActive(false);
+            UIFactory.AddPopIn(_homePanel.gameObject);
+            _homePanel.gameObject.SetActive(false);
+            _homePanel.gameObject.SetActive(true);
+        }
+
+        void ShowTab(int tab)
+        {
+            if (tab == _tab) return;
+            _tab = tab;
+            _homePanel.gameObject.SetActive(false);
+            _tabBar.gameObject.SetActive(tab != 0 && tab != 2);
+            _contentWrap.gameObject.SetActive(tab != 0 && tab != 2);
+            _infoPanel.gameObject.SetActive(tab == 0);
+            _chatPanel.gameObject.SetActive(tab == 1);
+            _charsPanel.gameObject.SetActive(tab == 2);
+            _extraPanel.gameObject.SetActive(tab == 3);
+            var active = tab == 0 ? _infoPanel : tab == 1 ? _chatPanel : tab == 2 ? _charsPanel : _extraPanel;
+            UIFactory.AddPopIn(active.gameObject);
+            active.gameObject.SetActive(false);
+            active.gameObject.SetActive(true);
+            StyleTab(_tabInfo, tab == 0, InfoBlue);
+            StyleTab(_tabChat, tab == 1, ChatGreen);
+            StyleTab(_tabChars, tab == 2, CharsPurple);
+            StyleTab(_tabExtra, tab == 3, ExtraOrange);
+        }
+
+        void StyleTab(Button b, bool on, Color onColor)
+        {
+            b.GetComponent<Image>().color = on ? onColor : onColor * 0.8f;
+            b.transform.localScale = on ? Vector3.one * 1.07f : Vector3.one;
+        }
     }
-  }
 }
