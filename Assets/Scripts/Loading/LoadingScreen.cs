@@ -38,8 +38,9 @@ namespace SaveWaterEG
             float aspect = bgTex != null ? (float)bgTex.width / bgTex.height : 16f / 9f;
             var stage = UIFactory.Root(canvas.transform, "Stage");
             var fitter = stage.gameObject.AddComponent<AspectRatioFitter>();
-            fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = aspect;
+            
 
             if (bgTex != null)
             {

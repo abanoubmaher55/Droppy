@@ -218,12 +218,22 @@ namespace SaveWaterEG
             _cardTitle = UIFactory.Label(titleRt, "t", "", 27, Color.white);
             _cardTitle.fontStyle = FontStyle.Bold;
 
-            var chipRt = UIFactory.Place(card, "chip", 0.04f, 0.70f, 0.96f, 0.83f);
-            _cardIconBg = UIFactory.Place(chipRt, "cbg", 0.80f, 0.08f, 0.99f, 0.92f);
+           var chipRt = UIFactory.Place(card, "chip", 0.04f, 0.70f, 0.96f, 0.83f);
+            _cardIconBg = UIFactory.Place(chipRt, "cbg", 0.84f, 0.12f, 0.99f, 0.88f);
             _cardIcon = UIFactory.Img(_cardIconBg, "c", Resources.Load<Sprite>("Art/circle"), Color.white);
-            var chipIcon = UIFactory.Place(chipRt, "ci", 0.80f, 0.08f, 0.99f, 0.92f);
-            _cardType = UIFactory.Label(chipRt, "t", "", 22, new Color(0.9f, 0.4f, 0.1f), TextAnchor.MiddleRight);
+            _cardIcon.raycastTarget = false;
+            var chipIcon = UIFactory.Place(chipRt, "ci", 0.84f, 0.12f, 0.99f, 0.88f);
             var chipIconT = UIFactory.Label(chipIcon, "t", "", 22, Color.white);
+            chipIconT.raycastTarget = false;
+
+            _cardType = UIFactory.Label(chipRt, "t", "", 21, new Color(0.9f, 0.4f, 0.1f), TextAnchor.MiddleRight);
+            var typeRt = _cardType.rectTransform;
+            typeRt.anchorMin = new Vector2(0.02f, 0.05f);
+            typeRt.anchorMax = new Vector2(0.81f, 0.95f);
+            typeRt.offsetMin = Vector2.zero;
+            typeRt.offsetMax = Vector2.zero;
+            _cardType.raycastTarget = false;
+
             _cardType.gameObject.name = "chipText";
             _cardIconBg.gameObject.name = "chipBg";
             _chipIconText = chipIconT;
