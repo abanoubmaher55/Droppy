@@ -48,7 +48,7 @@ namespace SaveWaterEG
             homeB.GetComponentInChildren<Text>().fontStyle = FontStyle.Bold;
 
             var logoRt = UIFactory.Place(_tabBar, "Logo", 0.08f, 0.1f, 0.32f, 0.9f);
-            var logo = UIFactory.Label(logoRt, "t", "SaveWaterEG 💧", 44, Color.white, TextAnchor.MiddleLeft);
+            var logo = UIFactory.Label(logoRt, "t", "Droppy 💧", 44, Color.white, TextAnchor.MiddleLeft);
             logo.fontStyle = FontStyle.Bold;
             var lo = logo.gameObject.AddComponent<Outline>();
             lo.effectColor = new Color(0.05f, 0.3f, 0.6f); lo.effectDistance = new Vector2(2, -2);
